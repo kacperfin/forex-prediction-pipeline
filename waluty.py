@@ -14,7 +14,7 @@ data = yf.download(
 )
 
 # Zapisz do pliku CSV
-csv_filename = f"{ticker_symbol.replace('=','')}_4h_11.csv"
+csv_filename = f"{ticker_symbol.replace('=','')}_1h.csv"
 data.to_csv(csv_filename)
 
 print(f"Dane zapisano do pliku: {csv_filename}")
