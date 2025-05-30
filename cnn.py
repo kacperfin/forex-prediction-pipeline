@@ -13,7 +13,7 @@ if response.status_code == 200 and response.text.strip():
     data = response.json()
     historical_data = data.get("fear_and_greed_historical", {}).get("data", [])
 
-    with open("fear_and_greed_historical11.csv", mode="w", newline="") as file:
+    with open("fear_and_greed_historical.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["datetime", "fear_greed"])
 
