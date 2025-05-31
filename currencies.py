@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 ticker_symbol = 'EURPLN=X'
 
 end_date = datetime.now()
-start_date = end_date - timedelta(days=30)
+start_date = end_date - timedelta(days=180)
 
 data = yf.download(
     ticker_symbol,
@@ -14,7 +14,7 @@ data = yf.download(
 )
 
 # Zapisz do pliku CSV
-csv_filename = f"{ticker_symbol.replace('=','')}_4h_1.csv"
+csv_filename = f"{ticker_symbol.replace('=','')}_1h.csv"
 data.to_csv(csv_filename)
 
 print(f"Dane zapisano do pliku: {csv_filename}")
