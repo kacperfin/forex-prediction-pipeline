@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 import pymongo
 from dotenv import load_dotenv
 
@@ -59,3 +61,18 @@ class MongoClient:
         print("Remaining databases:", self.client.list_database_names())
 
         self.db = self.client[db_name]
+
+    def get_processed_data(self) -> pd.DataFrame:
+        processed_collection = self.get_collection('processed_data')
+
+        cursor = processed_collection.find({})
+        df = pd.DataFrame(list(cursor))
+
+        if '_id' in df.columns:
+            df.drop('_id', axis=1, inplace=True)
+
+        if 'Datetime' in df.columns:
+            df['Datetime'] = pd.to_datetime(df['Datetime'])
+            df.set_index('Datetime', inplace=True)
+
+        return df

@@ -28,7 +28,7 @@ class RedditProducer(BaseProducer):
     def __init__(self):
         super().__init__(interval_in_sec=60 * 60)
         self.reddit = self.init_reddit()
-        self.limit = 1000
+        self.limit = 200
 
     def fetch(self, subcategory: str) -> dict or None:
         subreddit_name = subcategory

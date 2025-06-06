@@ -9,11 +9,11 @@ class CNNConsumer(BaseConsumer):
     def process(self, data: dict):
         self.collection.insert_one({
             'timestamp': data['timestamp'],
-            'score': data['score'],
-            'classification': data['classification'],
-            'previous_close': data['previous_close'],
-            'week_ago': data['week_ago'],
-            'month_ago': data['month_ago']
+            'fear_greed': data['fear_greed'],
+            # 'classification': data['classification'],
+            # 'previous_close': data['previous_close'],
+            # 'week_ago': data['week_ago'],
+            # 'month_ago': data['month_ago']
         })
 
-        print(f"Processed Fear & Greed data: {data['score']} ({data['classification']})")
+        print(f"Processed Fear & Greed data: {data['fear_greed']}")

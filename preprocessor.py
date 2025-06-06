@@ -38,15 +38,19 @@ class Preprocessor:
 
         return df_forex
 
-    def _add_technical_features(self, df):
+    def _add_technical_features(self, df, ticker='EURPLN=X'):
         """
         Dodawanie wskaźników technicznych
         """
         # Podstawowe cechy cenowe
-        df['price_change'] = df['Close'].pct_change().fillna(0)
-        df['price_change_abs'] = df['price_change'].abs()
-        df['high_low_ratio'] = df['High'] / df['Low']
-        df['close_open_ratio'] = df['Close'] / df['Open']
+        df[f'{ticker}_price_change'] = df[f"('Close', '{ticker}')"].pct_change().fillna(0)
+        df[f'{ticker}_price_change_abs'] = df[f'{ticker}_price_change'].abs()
+        df[f'{ticker}_high_low_ratio'] = df[f"('High', '{ticker}')"] / df[f"('Low', '{ticker}')"]
+        df[f'{ticker}_close_open_ratio'] = df[f"('Close', '{ticker}')"] / df[f"('Open', '{ticker}')"]
+        print(df[f'{ticker}_price_change'])
+        print(df[f'{ticker}_price_change_abs'])
+        print(df[f'{ticker}_high_low_ratio'])
+        print(df[f'{ticker}_close_open_ratio'])
 
         hours_per_day = 24
 
@@ -54,34 +58,34 @@ class Preprocessor:
         sma_periods_days = [5, 10, 25]
         for period_days in sma_periods_days:
             period_hours = period_days * hours_per_day
-            df[f'SMA_{period_days}D'] = df['Close'].rolling(window=period_hours).mean().fillna(0)
+            df[f'{ticker}_SMA_{period_days}D'] = df[f"('Close', '{ticker}')"].rolling(window=period_hours).mean().fillna(0)
 
         # RSI
         rsi_window_days = 14
         rsi_window_hours = rsi_window_days * hours_per_day
-        delta = df['Close'].diff(1)
+        delta = df[f"('Close', '{ticker}')"].diff(1)
 
         gain = (delta.where(delta > 0, 0)).rolling(window=rsi_window_hours).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=rsi_window_hours).mean()
 
         rs = gain / loss
-        df[f'RSI_{rsi_window_days}D'] = 100 - (100 / (1 + rs))
-        df[f'RSI_{rsi_window_days}D'].fillna(0, inplace=True)
+        df[f'{ticker}_RSI_{rsi_window_days}D'] = 100 - (100 / (1 + rs))
+        df[f'{ticker}_RSI_{rsi_window_days}D'].fillna(0, inplace=True)
 
         # Wstęgi Bollingera
         bb_periods_days = 20
         bb_periods_hours = bb_periods_days * hours_per_day
         bb_num_std_dev = 2
 
-        df[f'BB_Middle_{bb_periods_days}D'] = df['Close'].rolling(window=bb_periods_hours).mean()
-        std_dev = df['Close'].rolling(window=bb_periods_hours).std()
+        df[f'{ticker}_BB_Middle_{bb_periods_days}D'] = df[f"('Close', '{ticker}')"].rolling(window=bb_periods_hours).mean()
+        std_dev = df[f"('Close', '{ticker}')"].rolling(window=bb_periods_hours).std()
 
-        df[f'BB_Upper_{bb_periods_days}D'] = df[f'BB_Middle_{bb_periods_days}D'] + (std_dev * bb_num_std_dev)
-        df[f'BB_Lower_{bb_periods_days}D'] = df[f'BB_Middle_{bb_periods_days}D'] - (std_dev * bb_num_std_dev)
+        df[f'{ticker}_BB_Upper_{bb_periods_days}D'] = df[f'{ticker}_BB_Middle_{bb_periods_days}D'] + (std_dev * bb_num_std_dev)
+        df[f'{ticker}_BB_Lower_{bb_periods_days}D'] = df[f'{ticker}_BB_Middle_{bb_periods_days}D'] - (std_dev * bb_num_std_dev)
 
-        df[f'BB_Middle_{bb_periods_days}D'].fillna(0, inplace=True)
-        df[f'BB_Upper_{bb_periods_days}D'].fillna(0, inplace=True)
-        df[f'BB_Lower_{bb_periods_days}D'].fillna(0, inplace=True)
+        df[f'{ticker}_BB_Middle_{bb_periods_days}D'].fillna(0, inplace=True)
+        df[f'{ticker}_BB_Upper_{bb_periods_days}D'].fillna(0, inplace=True)
+        df[f'{ticker}_BB_Lower_{bb_periods_days}D'].fillna(0, inplace=True)
 
         # Cechy czasowe
         df['hour'] = df.index.hour

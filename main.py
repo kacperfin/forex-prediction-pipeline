@@ -1,6 +1,8 @@
 import time
 import threading
 
+from kafka.errors import NoBrokersAvailable
+
 from consumers import CONSUMERS, run_all_consumers
 from producers import PRODUCERS, run_all_producers
 
@@ -8,17 +10,26 @@ from producers import PRODUCERS, run_all_producers
 def main():
     print("Starting data pipeline...")
     total_threads = len(PRODUCERS) + len(CONSUMERS)
-    startup_barrier = threading.Barrier(total_threads + 1)
 
-    print("Starting all producers in parallel")
-    producer_threads = run_all_producers(startup_barrier)
+    # Include main thread, exclude DataProcessorProducer and DataProcessorConsumer
+    startup_barrier = threading.Barrier(total_threads + 1 - 2)
 
-    print("Starting all consumers in parallel")
-    consumer_threads = run_all_consumers(startup_barrier)
+    try:
+        print("Starting all producers in parallel...")
+        producer_threads = run_all_producers(startup_barrier)
 
-    print("Waiting for all threads to initialize...")
-    startup_barrier.wait()
-    print("All threads initialized successfully! Processing data...")
+        print("Starting all consumers in parallel...")
+        consumer_threads = run_all_consumers(startup_barrier)
+
+        print("Waiting for all threads to initialize...")
+        startup_barrier.wait()
+        print("All threads initialized successfully! Processing data...")
+    except NoBrokersAvailable as e:
+        print(f"Kafka brokers not available, did you launch Docker containers?\n{e}")
+        return
+    except Exception as e:
+        print(f"Error during startup: {e}")
+        return
 
     all_threads = producer_threads + consumer_threads
     try:
@@ -28,6 +39,7 @@ def main():
             time.sleep(60)
     except KeyboardInterrupt:
         print("Shutting down data pipeline...")
+
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,5 @@
 import json
+import traceback
 from abc import ABC, abstractmethod
 
 from kafka import KafkaConsumer
@@ -25,6 +26,7 @@ class BaseConsumer(ABC):
                 print(f"Consumed data from: {topic}")
             except Exception as e:
                 print(f"Error processing data: {e}")
+                traceback.print_exc()
 
     @abstractmethod
     def process(self, data: dict):
